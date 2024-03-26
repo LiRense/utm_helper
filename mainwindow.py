@@ -196,15 +196,15 @@ class MainWindow(QMainWindow):
                 f'echo {self.password} | sudo -S rm -r /opt/utm/',
                 f'echo {self.password} | sudo -S rm -r /opt/utm/']
         self.progressbar_use(status='start')
-        i=0
+        k=0
         for i in spis:
-            i += 25
+            k += 25
             try:
                 output = subprocess.check_output(i, shell=True, text=True)
                 self.ui.textEdit.append(str(output))
-                self.progressbar_use(counter=i)
+                self.progressbar_use(counter=k)
             except:
-                self.progressbar_use(counter=i)
+                self.progressbar_use(counter=k)
 #        filen = open('save_conf/last_prop.txt','w')
 #        filen.close()
         self.progressbar_use(status='end')
