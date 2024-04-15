@@ -132,6 +132,12 @@ class Ui_mainWindow(object):
 
         self.gridLayout_4.addWidget(self.templates_bt, 0, 1, 1, 1)
 
+        self.debugg_btn = QPushButton(self.groupBox_3)
+        self.debugg_btn.setObjectName(u"debugg_btn")
+        self.debugg_btn.setText('Дебажное логирование')
+
+        self.gridLayout_4.addWidget(self.debugg_btn, 1, 1, 1, 1)
+
         self.shifr_bt = QPushButton(self.groupBox_3)
         self.shifr_bt.setObjectName(u"shifr_bt")
 
