@@ -160,36 +160,51 @@ class MainWindow(QMainWindow):
                 continue
             yield row
 
-    def follow_stop(self,thefile1):
-        self.root_ow()
-        log = open(thefile1, "r")
-        rows = log.readlines()
-        row_end = rows[-1]
-        if row_end.find("Shutdown completed.") != -1:
-            return 'stop'
+    # def follow_stop(self,thefile1):
+    #     self.root_ow()
+    #     log = open(thefile1, "r")
+    #     rows = log.readlines()
+    #     row_end = rows[-1]
+    #     if row_end.find("Shutdown completed.") != -1:
+    #         return 'stop'
 
-    def follow(self,thefile1):
-        self.root_ow()
-        log = open(thefile1, "r")
-        log_rows = self.read_realtime(log)
-        for row in log_rows:
-            # if status == 'stop':
-            #     if row.find("Shutdown completed.") != -1:
-            #         return 'stop'
-            # if status == 'start':
-            if row.find('Starting Transport using') != -1:
-                self.progressbar_use('start', 0)
-            if row.find('Initialized JPA EntityManagerFactory') != -1:
-                self.progressbar_use(None, 20)
-            if row.find('Cheques address:') != -1:
-                self.progressbar_use(None, 40)
-            if row.find('Starting Quartz Scheduler now') != -1:
-                self.progressbar_use(None, 60)
-            if row.find('Запуск процедуры обновления по расписанию') != -1:
-                self.progressbar_use(None, 80)
-            if row.find('Завершение задачи обмена документами с сервером ЕГАИС по расписанию') != -1:
-                self.progressbar_use('end')
-                return 'start'
+    # def follow(self,thefile1):
+    #     self.root_ow()
+    #     log = open(thefile1, "r")
+    #     log_rows = self.read_realtime(log)
+    #     for row in log_rows:
+    #         # if status == 'stop':
+    #         #     if row.find("Shutdown completed.") != -1:
+    #         #         return 'stop'
+    #         # if status == 'start':
+    #         if row.find('Starting Transport using') != -1:
+    #             self.progressbar_use('start', 0)
+    #         if row.find('Initialized JPA EntityManagerFactory') != -1:
+    #             self.progressbar_use(None, 20)
+    #         if row.find('Cheques address:') != -1:
+    #             self.progressbar_use(None, 40)
+    #         if row.find('Starting Quartz Scheduler now') != -1:
+    #             self.progressbar_use(None, 60)
+    #         if row.find('Запуск процедуры обновления по расписанию') != -1:
+    #             self.progressbar_use(None, 80)
+    #         if row.find('Завершение задачи обмена документами с сервером ЕГАИС по расписанию') != -1:
+    #             self.progressbar_use('end')
+    #             return 'start'
+
+    def follow_status_start(self):
+        try:
+            response = requests.get('http://localhost:8080/info/version', headers={"Content-Type": "text"})
+        except ConnectionError:
+            pass
+        while response.text != '':
+            time.sleep(2)
+            try:
+                response = requests.get('http://localhost:8080/info/version', headers={"Content-Type": "text"})
+            except ConnectionError:
+                pass
+            finally:
+                time.sleep(2)
+        return 'start'
 
 
     def stop_utm(self):
@@ -204,7 +219,7 @@ class MainWindow(QMainWindow):
         utc_cur_date = datetime.now(timezone.utc)
         self.clear_logs()
         os.system(f'echo {self.password} | sudo -S supervisorctl start utm')
-        result = self.follow('/opt/utm/transport/l/transport_info.log')
+        result = self.follow_status_start()
         if result == 'start':
             self.ui.textEdit.setPlainText(str(utc_cur_date) + ' | УТМ можно пользоваться')
         self.status_utm()
@@ -300,7 +315,7 @@ class MainWindow(QMainWindow):
         self.progressbar_use(status='end')
         time.sleep(1)
 
-        result = self.follow('/opt/utm/transport/l/transport_info.log')
+        result = self.follow_status_start()
         if result == 'start':
             self.ui.textEdit.setPlainText(str(utc_cur_date) + ' | УТМ можно пользоваться')
 
